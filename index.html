@@ -292,6 +292,15 @@
       font-weight: 700;
     }
 
+    .mini-ball.group-1 { background: linear-gradient(135deg, #f59e0b, #f97316); }
+    .mini-ball.group-2 { background: linear-gradient(135deg, #2563eb, #06b6d4); }
+    .mini-ball.group-3 { background: linear-gradient(135deg, #ef4444, #ec4899); }
+    .mini-ball.group-4 { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+    .mini-ball.group-5 { background: linear-gradient(135deg, #16a34a, #14b8a6); }
+    .mini-ball.bonus {
+      outline: 3px solid rgba(15, 118, 110, 0.2);
+    }
+
     .hint {
       margin-top: 14px;
       color: var(--muted);
@@ -495,7 +504,7 @@
           item.className = "history-item";
 
           const title = document.createElement("strong");
-          title.textContent = `${entry.round}회차`;
+          title.textContent = `${entry.round}회차 추첨`;
           item.appendChild(title);
 
           const wrap = document.createElement("div");
