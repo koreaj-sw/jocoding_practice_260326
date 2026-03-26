@@ -6,15 +6,55 @@
   <title>로또 번호 추첨기</title>
   <style>
     :root {
+      color-scheme: light;
       --bg-1: #fff7ed;
       --bg-2: #fde68a;
+      --bg-3: rgba(255, 255, 255, 0.9);
       --card: rgba(255, 255, 255, 0.76);
+      --panel: rgba(255, 255, 255, 0.74);
+      --panel-strong: rgba(255, 255, 255, 0.9);
       --text: #1f2937;
       --muted: #6b7280;
       --accent: #ea580c;
       --accent-2: #0f766e;
       --line: rgba(31, 41, 55, 0.12);
       --shadow: 0 18px 50px rgba(120, 53, 15, 0.18);
+      --hero-start: rgba(234, 88, 12, 0.92);
+      --hero-end: rgba(251, 146, 60, 0.82);
+      --hero-text: rgba(255, 255, 255, 0.9);
+      --pending-bg: rgba(148, 163, 184, 0.3);
+      --pending-text: rgba(15, 23, 42, 0.55);
+      --pending-line: rgba(100, 116, 139, 0.35);
+      --button-secondary: rgba(255, 255, 255, 0.9);
+      --toggle-bg: rgba(255, 255, 255, 0.16);
+      --toggle-text: #fff7ed;
+      --toggle-border: rgba(255, 255, 255, 0.24);
+    }
+
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --bg-1: #0f172a;
+      --bg-2: #1e293b;
+      --bg-3: rgba(15, 23, 42, 0.75);
+      --card: rgba(15, 23, 42, 0.78);
+      --panel: rgba(15, 23, 42, 0.72);
+      --panel-strong: rgba(15, 23, 42, 0.84);
+      --text: #e5eefb;
+      --muted: #94a3b8;
+      --accent: #f97316;
+      --accent-2: #14b8a6;
+      --line: rgba(148, 163, 184, 0.18);
+      --shadow: 0 24px 70px rgba(2, 6, 23, 0.55);
+      --hero-start: rgba(15, 23, 42, 0.96);
+      --hero-end: rgba(30, 41, 59, 0.92);
+      --hero-text: rgba(226, 232, 240, 0.92);
+      --pending-bg: rgba(51, 65, 85, 0.85);
+      --pending-text: rgba(226, 232, 240, 0.78);
+      --pending-line: rgba(148, 163, 184, 0.24);
+      --button-secondary: rgba(15, 23, 42, 0.92);
+      --toggle-bg: rgba(255, 255, 255, 0.08);
+      --toggle-text: #f8fafc;
+      --toggle-border: rgba(148, 163, 184, 0.2);
     }
 
     * {
@@ -27,30 +67,40 @@
       font-family: "Segoe UI", "Apple SD Gothic Neo", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), transparent 32%),
-        radial-gradient(circle at bottom right, rgba(251, 146, 60, 0.25), transparent 30%),
+        radial-gradient(circle at top left, var(--bg-3), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(251, 146, 60, 0.18), transparent 30%),
         linear-gradient(135deg, var(--bg-1), var(--bg-2));
       display: grid;
       place-items: center;
       padding: 24px;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     .app {
       width: min(100%, 960px);
       background: var(--card);
       backdrop-filter: blur(18px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 28px;
       box-shadow: var(--shadow);
       overflow: hidden;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
     }
 
     .hero {
-      padding: 44px 28px 26px;
+      padding: 32px 28px 26px;
       background:
-        linear-gradient(120deg, rgba(234, 88, 12, 0.92), rgba(251, 146, 60, 0.82)),
+        linear-gradient(120deg, var(--hero-start), var(--hero-end)),
         linear-gradient(45deg, rgba(255, 255, 255, 0.12), transparent);
       color: #fff;
+    }
+
+    .hero-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 16px;
     }
 
     .hero h1 {
@@ -65,7 +115,14 @@
       max-width: 620px;
       font-size: 1rem;
       line-height: 1.6;
-      color: rgba(255, 255, 255, 0.9);
+      color: var(--hero-text);
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--toggle-border);
+      background: var(--toggle-bg);
+      color: var(--toggle-text);
+      white-space: nowrap;
     }
 
     .content {
@@ -76,10 +133,11 @@
     }
 
     .panel {
-      background: rgba(255, 255, 255, 0.74);
+      background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 24px;
       padding: 22px;
+      transition: background 0.3s ease, border-color 0.3s ease;
     }
 
     .panel h2 {
@@ -111,10 +169,10 @@
     }
 
     .ball.pending {
-      background: rgba(148, 163, 184, 0.3);
-      color: rgba(15, 23, 42, 0.55);
+      background: var(--pending-bg);
+      color: var(--pending-text);
       box-shadow: none;
-      border: 1px dashed rgba(100, 116, 139, 0.35);
+      border: 1px dashed var(--pending-line);
     }
 
     .ball.group-1 { background: linear-gradient(135deg, #f59e0b, #f97316); }
@@ -144,7 +202,7 @@
       font-size: 0.98rem;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.3s ease, color 0.3s ease;
     }
 
     button:hover {
@@ -164,7 +222,7 @@
     }
 
     .secondary {
-      background: rgba(255, 255, 255, 0.9);
+      background: var(--button-secondary);
       color: var(--text);
       border: 1px solid var(--line);
     }
@@ -179,7 +237,7 @@
     .stat {
       padding: 16px;
       border-radius: 18px;
-      background: rgba(255, 255, 255, 0.78);
+      background: var(--panel-strong);
       border: 1px solid var(--line);
     }
 
@@ -206,7 +264,7 @@
     .history-item {
       border: 1px solid var(--line);
       border-radius: 18px;
-      background: rgba(255, 255, 255, 0.72);
+      background: var(--panel-strong);
       padding: 14px;
     }
 
@@ -260,14 +318,28 @@
       .meta {
         grid-template-columns: 1fr;
       }
+
+      .hero-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .theme-toggle {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <main class="app">
     <section class="hero">
-      <h1>행운 번호 추첨기</h1>
-      <p>1부터 45까지의 숫자 중 중복 없이 6개를 추첨하고, 보너스 번호 1개를 추가로 뽑습니다. 새 게임을 눌러 이번 회차의 번호를 확인하세요.</p>
+      <div class="hero-bar">
+        <div>
+          <h1>행운 번호 추첨기</h1>
+          <p>1부터 45까지의 숫자 중 중복 없이 6개를 추첨하고, 보너스 번호 1개를 추가로 뽑습니다. 새 게임을 눌러 이번 회차의 번호를 확인하세요.</p>
+        </div>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="테마 변경">다크 모드</button>
+      </div>
     </section>
 
     <section class="content">
@@ -304,18 +376,46 @@
   </main>
 
   <script>
+    const bodyEl = document.body;
     const ballsEl = document.getElementById("balls");
     const historyEl = document.getElementById("history");
     const drawButton = document.getElementById("drawButton");
     const quickButton = document.getElementById("quickButton");
     const resetButton = document.getElementById("resetButton");
+    const themeToggle = document.getElementById("themeToggle");
     const drawCountEl = document.getElementById("drawCount");
     const sumValueEl = document.getElementById("sumValue");
     const oddEvenValueEl = document.getElementById("oddEvenValue");
+    const themeStorageKey = "lotto-theme";
 
     const history = [];
     let drawCount = 0;
     let isDrawing = false;
+
+    function getPreferredTheme() {
+      const storedTheme = window.localStorage.getItem(themeStorageKey);
+      if (storedTheme === "dark" || storedTheme === "light") {
+        return storedTheme;
+      }
+
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+
+    function updateThemeButton(theme) {
+      themeToggle.textContent = theme === "dark" ? "화이트 모드" : "다크 모드";
+      themeToggle.setAttribute("aria-label", theme === "dark" ? "화이트 모드로 전환" : "다크 모드로 전환");
+    }
+
+    function applyTheme(theme) {
+      bodyEl.dataset.theme = theme;
+      window.localStorage.setItem(themeStorageKey, theme);
+      updateThemeButton(theme);
+    }
+
+    function toggleTheme() {
+      const nextTheme = bodyEl.dataset.theme === "dark" ? "light" : "dark";
+      applyTheme(nextTheme);
+    }
 
     function getGroupClass(number) {
       if (number <= 10) return "group-1";
@@ -493,7 +593,9 @@
     drawButton.addEventListener("click", drawAnimated);
     quickButton.addEventListener("click", drawInstant);
     resetButton.addEventListener("click", resetAll);
+    themeToggle.addEventListener("click", toggleTheme);
 
+    applyTheme(getPreferredTheme());
     resetAll();
   </script>
 </body>
