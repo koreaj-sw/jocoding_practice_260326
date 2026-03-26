@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>로또 번호 추첨기</title>
+  <style>
+    :root {
+      --bg-1: #fff7ed;
+      --bg-2: #fde68a;
+      --card: rgba(255, 255, 255, 0.76);
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #ea580c;
+      --accent-2: #0f766e;
+      --line: rgba(31, 41, 55, 0.12);
+      --shadow: 0 18px 50px rgba(120, 53, 15, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "Apple SD Gothic Neo", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(251, 146, 60, 0.25), transparent 30%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(100%, 960px);
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero {
+      padding: 44px 28px 26px;
+      background:
+        linear-gradient(120deg, rgba(234, 88, 12, 0.92), rgba(251, 146, 60, 0.82)),
+        linear-gradient(45deg, rgba(255, 255, 255, 0.12), transparent);
+      color: #fff;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 14px 0 0;
+      max-width: 620px;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1.3fr 0.9fr;
+      gap: 20px;
+      padding: 24px;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+    }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      font-size: 1.1rem;
+    }
+
+    .balls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      min-height: 72px;
+      margin-bottom: 20px;
+    }
+
+    .ball {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.16);
+      transform: translateY(0) scale(1);
+      animation: pop 0.35s ease;
+    }
+
+    .ball.pending {
+      background: rgba(148, 163, 184, 0.3);
+      color: rgba(15, 23, 42, 0.55);
+      box-shadow: none;
+      border: 1px dashed rgba(100, 116, 139, 0.35);
+    }
+
+    .ball.group-1 { background: linear-gradient(135deg, #f59e0b, #f97316); }
+    .ball.group-2 { background: linear-gradient(135deg, #2563eb, #06b6d4); }
+    .ball.group-3 { background: linear-gradient(135deg, #ef4444, #ec4899); }
+    .ball.group-4 { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+    .ball.group-5 { background: linear-gradient(135deg, #16a34a, #14b8a6); }
+    .ball.bonus { outline: 4px solid rgba(15, 118, 110, 0.18); }
+
+    .plus {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin: 0 4px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 20px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), #fb923c);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(234, 88, 12, 0.24);
+    }
+
+    .secondary {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid var(--line);
+    }
+
+    .stat .label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat strong {
+      font-size: 1.15rem;
+    }
+
+    .history {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 408px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      padding: 14px;
+    }
+
+    .history-item strong {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+
+    .mini-balls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mini-ball {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .hint {
+      margin-top: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.92rem;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: translateY(12px) scale(0.85);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .meta {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <h1>행운 번호 추첨기</h1>
+      <p>1부터 45까지의 숫자 중 중복 없이 6개를 추첨하고, 보너스 번호 1개를 추가로 뽑습니다. 새 게임을 눌러 이번 회차의 번호를 확인하세요.</p>
+    </section>
+
+    <section class="content">
+      <section class="panel">
+        <h2>이번 추첨 결과</h2>
+        <div id="balls" class="balls" aria-live="polite"></div>
+        <div class="actions">
+          <button id="drawButton" class="primary">번호 추첨</button>
+          <button id="quickButton" class="secondary">즉시 추첨</button>
+          <button id="resetButton" class="secondary">초기화</button>
+        </div>
+        <div class="meta">
+          <div class="stat">
+            <span class="label">추첨 횟수</span>
+            <strong id="drawCount">0회</strong>
+          </div>
+          <div class="stat">
+            <span class="label">번호 합계</span>
+            <strong id="sumValue">-</strong>
+          </div>
+          <div class="stat">
+            <span class="label">홀짝 비율</span>
+            <strong id="oddEvenValue">-</strong>
+          </div>
+        </div>
+        <p class="hint">실제 복권 결과가 아니라 무작위 시뮬레이션입니다. 번호를 참고용으로만 사용하세요.</p>
+      </section>
+
+      <aside class="panel">
+        <h2>최근 추첨 기록</h2>
+        <div id="history" class="history"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const ballsEl = document.getElementById("balls");
+    const historyEl = document.getElementById("history");
+    const drawButton = document.getElementById("drawButton");
+    const quickButton = document.getElementById("quickButton");
+    const resetButton = document.getElementById("resetButton");
+    const drawCountEl = document.getElementById("drawCount");
+    const sumValueEl = document.getElementById("sumValue");
+    const oddEvenValueEl = document.getElementById("oddEvenValue");
+
+    const history = [];
+    let drawCount = 0;
+    let isDrawing = false;
+
+    function getGroupClass(number) {
+      if (number <= 10) return "group-1";
+      if (number <= 20) return "group-2";
+      if (number <= 30) return "group-3";
+      if (number <= 40) return "group-4";
+      return "group-5";
+    }
+
+    function createBall(number, extraClass = "") {
+      const ball = document.createElement("div");
+      ball.className = `ball ${getGroupClass(number)} ${extraClass}`.trim();
+      ball.textContent = number;
+      return ball;
+    }
+
+    function createMiniBall(number, extraClass = "") {
+      const ball = document.createElement("div");
+      ball.className = `mini-ball ${getGroupClass(number)} ${extraClass}`.trim();
+      ball.textContent = number;
+      return ball;
+    }
+
+    function createPendingBall() {
+      const ball = document.createElement("div");
+      ball.className = "ball pending";
+      ball.textContent = "?";
+      return ball;
+    }
+
+    function pickNumbers() {
+      const pool = Array.from({ length: 45 }, (_, index) => index + 1);
+      for (let index = pool.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [pool[index], pool[swapIndex]] = [pool[swapIndex], pool[index]];
+      }
+
+      const mainNumbers = pool.slice(0, 6).sort((a, b) => a - b);
+      const bonusNumber = pool[6];
+      return { mainNumbers, bonusNumber };
+    }
+
+    function renderPlaceholder() {
+      ballsEl.innerHTML = "";
+      for (let index = 0; index < 6; index += 1) {
+        ballsEl.appendChild(createPendingBall());
+      }
+      const plus = document.createElement("span");
+      plus.className = "plus";
+      plus.textContent = "+";
+      ballsEl.appendChild(plus);
+      ballsEl.appendChild(createPendingBall());
+    }
+
+    function updateStats(mainNumbers) {
+      const oddCount = mainNumbers.filter((number) => number % 2 !== 0).length;
+      const evenCount = mainNumbers.length - oddCount;
+      const sum = mainNumbers.reduce((total, number) => total + number, 0);
+
+      drawCountEl.textContent = `${drawCount}회`;
+      sumValueEl.textContent = `${sum}`;
+      oddEvenValueEl.textContent = `${oddCount}:${evenCount}`;
+    }
+
+    function renderHistory() {
+      if (history.length === 0) {
+        historyEl.innerHTML = '<p class="hint">아직 추첨 기록이 없습니다.</p>';
+        return;
+      }
+
+      historyEl.innerHTML = "";
+      history
+        .slice()
+        .reverse()
+        .forEach((entry) => {
+          const item = document.createElement("article");
+          item.className = "history-item";
+
+          const title = document.createElement("strong");
+          title.textContent = `${entry.round}회차`;
+          item.appendChild(title);
+
+          const wrap = document.createElement("div");
+          wrap.className = "mini-balls";
+          entry.mainNumbers.forEach((number) => {
+            wrap.appendChild(createMiniBall(number));
+          });
+
+          const plus = document.createElement("span");
+          plus.className = "plus";
+          plus.textContent = "+";
+          wrap.appendChild(plus);
+          wrap.appendChild(createMiniBall(entry.bonusNumber, "bonus"));
+          item.appendChild(wrap);
+          historyEl.appendChild(item);
+        });
+    }
+
+    function finishDraw(result) {
+      ballsEl.innerHTML = "";
+      result.mainNumbers.forEach((number) => {
+        ballsEl.appendChild(createBall(number));
+      });
+
+      const plus = document.createElement("span");
+      plus.className = "plus";
+      plus.textContent = "+";
+      ballsEl.appendChild(plus);
+      ballsEl.appendChild(createBall(result.bonusNumber, "bonus"));
+
+      drawCount += 1;
+      history.push({
+        round: drawCount,
+        mainNumbers: result.mainNumbers,
+        bonusNumber: result.bonusNumber
+      });
+
+      updateStats(result.mainNumbers);
+      renderHistory();
+      isDrawing = false;
+      drawButton.disabled = false;
+      quickButton.disabled = false;
+    }
+
+    function drawAnimated() {
+      if (isDrawing) return;
+      isDrawing = true;
+      drawButton.disabled = true;
+      quickButton.disabled = true;
+      renderPlaceholder();
+
+      const result = pickNumbers();
+      ballsEl.innerHTML = "";
+
+      result.mainNumbers.forEach((number, index) => {
+        setTimeout(() => {
+          ballsEl.appendChild(createBall(number));
+        }, 220 * (index + 1));
+      });
+
+      setTimeout(() => {
+        const plus = document.createElement("span");
+        plus.className = "plus";
+        plus.textContent = "+";
+        ballsEl.appendChild(plus);
+      }, 220 * 7);
+
+      setTimeout(() => {
+        ballsEl.appendChild(createBall(result.bonusNumber, "bonus"));
+      }, 220 * 8);
+
+      setTimeout(() => {
+        finishDraw(result);
+      }, 220 * 9);
+    }
+
+    function drawInstant() {
+      if (isDrawing) return;
+      finishDraw(pickNumbers());
+    }
+
+    function resetAll() {
+      isDrawing = false;
+      drawCount = 0;
+      history.length = 0;
+      drawButton.disabled = false;
+      quickButton.disabled = false;
+      renderPlaceholder();
+      drawCountEl.textContent = "0회";
+      sumValueEl.textContent = "-";
+      oddEvenValueEl.textContent = "-";
+      renderHistory();
+    }
+
+    drawButton.addEventListener("click", drawAnimated);
+    quickButton.addEventListener("click", drawInstant);
+    resetButton.addEventListener("click", resetAll);
+
+    resetAll();
+  </script>
+</body>
+</html>
